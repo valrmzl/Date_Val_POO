@@ -28,7 +28,7 @@ public class Millis extends DateTime {
 	public Millis(long ts) {
 		setTimestamp(ts);
 		System.out.println("ts del usuario: "+getTimestamp());
-		//findDateFromTimestamp();
+		findDateFromTimestamp();
 	}
 
 	public Millis() {
@@ -64,15 +64,25 @@ public class Millis extends DateTime {
 	}
 
 	public void setTimestamp(long timestamp) {
-		if(timestamp >= 0 && timestamp <= Calendar.getInstance().getTimeInMillis())
+		if(timestamp > 0 && timestamp <= Calendar.getInstance().getTimeInMillis())
 		this.timestamp = timestamp;
+		
+		else if(timestamp==0) {
+			this.timestamp=0;
+			setMonth(12); 
+			setYear(1969);
+			setHours(18);
+			setMinutes(0);
+			setSeconds(0);
+			setDay(31);
+		}
 	}
 	
 	public String toString() {
 		if(getFormat() == 0) {
 			String hms = super.toString().substring(1, 9); 
 			String d = super.toString().substring(11, 19);
-			return String.format("[%s.%d] %s", hms, getMilliseconds(), d);
+			return String.format("[%s.%03d] %s", hms, getMilliseconds(), d);
 		}
 		else {
 			return String.format("%s (%d)", super.toString(), getTimestamp());
@@ -99,6 +109,67 @@ public class Millis extends DateTime {
 //				+ getMilliseconds();
 		
 		//dif 2,610,838,000 millis
+	}
+	
+	public void findDateFromTimestamp(){
+		DateTime firstDate= new DateTime(31,12,1969,19,0,0);
+		long firstEpoch=0L;
+		setMilliseconds((int)timestamp%1000);
+		long seconds= timestamp/1000; //quitarle los milis para que quede en segundos 
+		
+		while(firstEpoch!=seconds) {
+			firstDate.next();
+			firstEpoch++;
+			
+		}
+		
+		setDay(firstDate.getDay());
+		setMonth(firstDate.getMonth());
+		setYear(firstDate.getYear());
+		setHours(firstDate.getHours());
+		setMinutes(firstDate.getMinutes());
+		setSeconds(firstDate.getSeconds());
+		setDay(firstDate.getDay());
+		
+	}
+	
+	@Override
+	public void next() {
+		if(milliseconds==999) {
+			milliseconds=0;
+			super.next();
+		}else
+			milliseconds++;
+			
+	}
+	
+	@Override 
+	public Millis clone() {
+		return new Millis(getDay(),getMonth(), getYear(), getHours(), getMinutes(), getSeconds(),this.milliseconds);
+		
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Millis)) return false;
+		
+		Millis m= (Millis) o;
+		return super.equals(o) && this.milliseconds==m.milliseconds;
+		
+		
+	}
+	
+	
+	@Override
+	public void setMonth(int m) {
+		super.setMonth(m);
+		findTimestamp();
+		timestamp-=3600;
+	}
+	
+	@Override
+	public void setHours(int h) {
+		
 	}
 
 
